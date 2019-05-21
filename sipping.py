@@ -93,17 +93,25 @@ Content-Length: 0
 
         return (endTime - startTime)
 
+
     # do many pings one after another
-    def ping(self, count):
+    def ping(self, count, delay=0):
         results = []
 
-        for x in range(5):
+        for x in range(count):
             # ping once
             results.append(self.ping_once())
 
+            if (x < (count-1)):
+                time.sleep(delay)
+
         return results
 
-#sipping = SipPing("10.1.2.3", 5060)
 
-#print(sipping.ping_once())
-#print(sipping.ping(3))
+sipping = SipPing("10.1.2.3", 5060)
+
+# just 1 ping
+print(sipping.ping_once())
+
+# many pings with time between
+print(sipping.ping(3, 1))
