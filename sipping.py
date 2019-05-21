@@ -108,10 +108,10 @@ Content-Length: 0
         return results
 
 
-sipping = SipPing("10.1.2.3", 5060)
+#sipping = SipPing("10.1.2.3", 5060)
 
 # just 1 ping
-print(sipping.ping_once())
+#print(sipping.ping_once())
 
 # many pings with time between
-print(sipping.ping(3, 1))
+#print(sipping.ping(3, 1))
