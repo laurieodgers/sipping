@@ -64,6 +64,7 @@ Content-Length: 0
         s.bind((self.src_ip, self.src_port))
         s.settimeout(self.timeout)
 
+        # record the start time for latency metrics
         startTime = int(round(time.time() * 1000))
 
         # connect and send response
@@ -86,11 +87,11 @@ Content-Length: 0
                 # Socket has not been assigned.
                 pass
 
+        # -1 means timeout
         if (timeout):
             return -1
 
         return (endTime - startTime)
-
 
     # do many pings one after another
     def ping(self, count):
@@ -102,7 +103,7 @@ Content-Length: 0
 
         return results
 
-#sipping = SipPing("35.244.100.52", 5060)
+#sipping = SipPing("10.1.2.3", 5060)
 
 #print(sipping.ping_once())
 #print(sipping.ping(3))
