@@ -2,7 +2,6 @@
 import re
 import socket
 import sys
-from argparse import ArgumentParser
 import time
 
 class SipPing:
@@ -36,7 +35,6 @@ Content-Length: 0
         # check formatting
         #print('"' + self.sip_options + '"')
 
-
     def ping_once(self):
         # keep track of a timeout
         timeout = False
@@ -65,7 +63,7 @@ Content-Length: 0
         s.settimeout(self.timeout)
 
         # record the start time for latency metrics
-        startTime = int(round(time.time() * 1000))
+        startTime = time.time()
 
         # connect and send response
         try:
@@ -77,7 +75,7 @@ Content-Length: 0
             timeout = True
 
         finally:
-            endTime = int(round(time.time() * 1000))
+            endTime = time.time()
             try:
                 # Regardless of what happened, try to gracefully close down the
                 # socket.
@@ -87,12 +85,11 @@ Content-Length: 0
                 # Socket has not been assigned.
                 pass
 
-        # -1 means timeout
+        # None means timeout
         if (timeout):
-            return -1
+            return None
 
         return (endTime - startTime)
-
 
     # do many pings one after another
     def ping(self, count, delay=0):
