@@ -4,50 +4,65 @@ import socket
 import sys
 import time
 import random
+import secrets
 
 class SipPing:
     def __init__(self, dest_addr, dest_port=5060, src_ip='', src_port=None, udp=True, timeout=1):
         self.dest_addr = dest_addr
         self.dest_port = dest_port
         self.src_ip = src_ip
+
         self.udp = udp
         self.timeout = timeout
 
-        # generate a random port if src_port is None
         if (src_port is None):
             # randomly generate a port betewen 1024 and 65535
             self.src_port = random.randint(1024, 65535)
         else:
             self.src_port = src_port
 
-        # set something that the sip options header can use as a src
         if (len(self.src_ip) > 0):
             sip_src_host = self.src_ip
         else:
             sip_src_host = "dummy.com"
 
+        self.from_tag = secrets.token_hex(8)
+        self.call_id = random.randint(1000000000,9999999999)
+
         # set up sip options header
         self.sip_options = '''\
-OPTIONS sip:{dest_addr}:{dest_port} SIP/2.0
-Via: SIP/2.0/UDP {sip_src_host}:{src_port}
-Max-Forwards: 70
-From: "Test" <sip:test@{sip_src_host}>;tag=98765
-To: <sip:dummy@{dest_addr}:{dest_port}>
-Contact: <sip:dummy@{sip_src_host}:{src_port}>
-Call-ID: 1234567@{sip_src_host}
+OPTIONS sip:nobody@{dest_addr}:{dest_port} SIP/2.0
+Via: SIP/2.0/UDP {sip_src_host}:{src_port};branch={{branch}};rport;alias
+From: sip:sipping@{sip_src_host}:{src_port};tag={from_tag}
+To: sip:nobody@{dest_addr}:{dest_port}
+Call-ID: {call_id}@{sip_src_host}
 CSeq: 1 OPTIONS
-Accept: application/sdp
+Contact: sip:sipping@{sip_src_host}:{src_port}
 Content-Length: 0
-'''.format(sip_src_host=sip_src_host, src_port=self.src_port, dest_addr=self.dest_addr, dest_port=self.dest_port)
+Max-Forwards: 70
+User-Agent: python3/sipping
+Accept: text/plain
+
+'''.format(
+    sip_src_host=sip_src_host,
+    src_port=self.src_port,
+    dest_addr=self.dest_addr,
+    dest_port=self.dest_port,
+    from_tag=self.from_tag,
+    call_id=self.call_id
+)
 
         # check formatting
         #print('"' + self.sip_options + '"')
 
-    # run a single ping with the options received in the constructor
-    # returns seconds as float
     def ping_once(self):
         # keep track of a timeout
         timeout = False
+
+        # update the branch in sip options header as it needs to be unique
+        # for each request
+        sip_options = self.sip_options.format(branch=secrets.token_hex(32))
+        #print(sip_options)
 
         # TCP
         if (not self.udp):
@@ -78,23 +93,25 @@ Content-Length: 0
         # connect and send response
         try:
             s.connect((self.dest_addr, self.dest_port))
-            s.send(str.encode(self.sip_options))
+            s.send(str.encode(sip_options))
             response = s.recv(65535)
 
         except socket.timeout:
+            #print('timeout: ' + self.dest_addr + ':' + str(self.dest_port))
             timeout = True
 
         finally:
+            # calculate how long this took
             endTime = time.time()
 
-            try:
-                # Regardless of what happened, try to gracefully close down the
-                # socket.
-                s.shutdown(1)
-                s.close()
-            except UnboundLocalError:
-                # Socket has not been assigned.
-                pass
+        try:
+            # Regardless of what happened, try to gracefully close down the
+            # socket.
+            s.shutdown(1)
+            s.close()
+        except UnboundLocalError:
+            # Socket has not been assigned.
+            pass
 
         # None means timeout
         if (timeout):
@@ -103,7 +120,6 @@ Content-Length: 0
         return (endTime - startTime)
 
     # do many pings one after another
-    # returns list of seconds as list of float
     def ping(self, count, delay=0):
         results = []
 
@@ -111,13 +127,12 @@ Content-Length: 0
             # ping once
             results.append(self.ping_once())
 
-            # delay before next loop if we havent reached the end of the loop
             if (x < (count-1)):
                 time.sleep(delay)
 
         return results
 
-# examples
+
 #sipping = SipPing("10.1.2.3", 5060)
 
 # just 1 ping
