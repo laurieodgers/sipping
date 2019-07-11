@@ -8,6 +8,7 @@ import secrets
 
 class SipPing:
     def __init__(self, dest_addr, dest_port=5060, src_ip='', src_port=None, udp=True, timeout=1):
+        self.version = '0.1.0'
         self.dest_addr = dest_addr
         self.dest_port = dest_port
         self.src_ip = src_ip
@@ -26,7 +27,7 @@ class SipPing:
         else:
             sip_src_host = "dummy.com"
 
-        self.from_tag = secrets.token_hex(8)
+        self.from_tag = secrets.token_hex(4)
         self.call_id = random.randint(1000000000,9999999999)
 
         # set up sip options header
@@ -40,7 +41,7 @@ CSeq: 1 OPTIONS
 Contact: sip:sipping@{sip_src_host}:{src_port}
 Content-Length: 0
 Max-Forwards: 70
-User-Agent: python3/sipping
+User-Agent: sipping {version}
 Accept: text/plain
 
 '''.format(
@@ -49,7 +50,8 @@ Accept: text/plain
     dest_addr=self.dest_addr,
     dest_port=self.dest_port,
     from_tag=self.from_tag,
-    call_id=self.call_id
+    call_id=self.call_id,
+    version=self.version
 )
 
         # check formatting
@@ -60,8 +62,10 @@ Accept: text/plain
         timeout = False
 
         # update the branch in sip options header as it needs to be unique
-        # for each request
-        sip_options = self.sip_options.format(branch=secrets.token_hex(32))
+        # for each request. note that z9hG4bK indicates that this branch is
+        # created in accordance with RFC 3261
+        branch = 'z9hG4bK.' + secrets.token_hex(4)
+        sip_options = self.sip_options.format(branch=branch)
         #print(sip_options)
 
         # TCP
