@@ -7,9 +7,6 @@ This class was brought into being based on the work done on SIPRig
 Options ping style python scripts but could not find one which presents as
 an actual class.
 
-This is a work in progress.
-
-
 ## License
 
 MIT License

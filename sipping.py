@@ -8,7 +8,7 @@ import secrets
 
 class SipPing:
     def __init__(self, dest_addr, dest_port=5060, src_ip='', src_port=None, udp=True, timeout=1):
-        self.version = '0.1.0'
+        self.version = '1.0.0'
         self.dest_addr = dest_addr
         self.dest_port = dest_port
         self.src_ip = src_ip
@@ -32,18 +32,18 @@ class SipPing:
 
         # set up sip options header
         self.sip_options = '''\
-OPTIONS sip:nobody@{dest_addr}:{dest_port} SIP/2.0
-Via: SIP/2.0/UDP {sip_src_host}:{src_port};branch={{branch}};rport;alias
-From: sip:sipping@{sip_src_host}:{src_port};tag={from_tag}
-To: sip:nobody@{dest_addr}:{dest_port}
-Call-ID: {call_id}@{sip_src_host}
-CSeq: 1 OPTIONS
-Contact: sip:sipping@{sip_src_host}:{src_port}
-Content-Length: 0
-Max-Forwards: 70
-User-Agent: sipping {version}
-Accept: text/plain
-
+OPTIONS sip:nobody@{dest_addr}:{dest_port} SIP/2.0\r
+Via: SIP/2.0/UDP {sip_src_host}:{src_port};branch={{branch}};rport;alias\r
+From: sip:sipping@{sip_src_host}:{src_port};tag={from_tag}\r
+To: sip:nobody@{dest_addr}:{dest_port}\r
+Call-ID: {call_id}@{sip_src_host}\r
+CSeq: 1 OPTIONS\r
+Contact: sip:sipping@{sip_src_host}:{src_port}\r
+Content-Length: 0\r
+Max-Forwards: 70\r
+User-Agent: sipping {version}\r
+Accept: text/plain\r
+\r
 '''.format(
     sip_src_host=sip_src_host,
     src_port=self.src_port,
