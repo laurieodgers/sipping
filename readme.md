@@ -11,6 +11,8 @@ an actual class.
 
 Despite the last commit being 5 years ago, this project is still in active use - I use it regularly to test SIP connectivity between networks.
 
+Feel free to submit any fixes with uncaught exceptions.
+
 ## License
 
 MIT License
