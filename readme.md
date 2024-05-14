@@ -7,6 +7,10 @@ This class was brought into being based on the work done on SIPRig
 Options ping style python scripts but could not find one which presents as
 an actual class.
 
+## Lifetime
+
+Despite the last commit being 5 years ago, this project is still in active use - I use it regularly to test SIP connectivity between networks.
+
 ## License
 
 MIT License
